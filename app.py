@@ -5,7 +5,7 @@ Free AI using Groq's API (14,400 requests/day free)
 Setup:
 1. pip install flask groq
 2. Get free key at https://console.groq.com
-3. Paste your key below
+3. Set env var: GROQ_API_KEY=your_key_here
 4. Run: python app.py
 5. Open: http://localhost:5000
 """
@@ -26,7 +26,6 @@ app = Flask(__name__)
 
 _ai = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-
 SUSPICION_THRESHOLD = 10
 
 # ── Hardcoded patterns ────────────────────────────────────────────────────────
@@ -38,8 +37,8 @@ SUSPICIOUS_KEYWORDS = [
     "urgent", "suspended", "locked", "alert", "immediately",
 ]
 
-TRUSTED_TLDS  = {".com", ".org", ".net", ".edu", ".gov", ".io", ".co"}
-RISKY_TLDS    = {
+TRUSTED_TLDS = {".com", ".org", ".net", ".edu", ".gov", ".io", ".co"}
+RISKY_TLDS = {
     ".tk", ".ml", ".ga", ".cf", ".gq", ".xyz", ".top", ".click",
     ".loan", ".work", ".online", ".site", ".live", ".stream",
     ".bid", ".download", ".review", ".win",
@@ -47,20 +46,22 @@ RISKY_TLDS    = {
 
 TRUSTED_BRANDS = [
     "paypal", "amazon", "apple", "microsoft", "google", "netflix",
-    "facebook", "instagram", "twitter", "linkedin", "ebay",
+    "facebook", "instagram", "x", "linkedin", "ebay",
     "wellsfargo", "chase", "bankofamerica", "citibank",
 ]
 
 # ── Levenshtein ───────────────────────────────────────────────────────────────
 
 def levenshtein(a, b):
-    if a == b: return 0
-    if len(a) < len(b): a, b = b, a
+    if a == b:
+        return 0
+    if len(a) < len(b):
+        a, b = b, a
     prev = list(range(len(b) + 1))
     for i, ca in enumerate(a):
         curr = [i + 1]
         for j, cb in enumerate(b):
-            curr.append(min(prev[j] + (ca != cb), prev[j+1] + 1, curr[j] + 1))
+            curr.append(min(prev[j] + (ca != cb), prev[j + 1] + 1, curr[j] + 1))
         prev = curr
     return prev[-1]
 
@@ -93,11 +94,11 @@ Scoring rules:
             temperature=0,
             messages=[
                 {"role": "system", "content": "You are a cybersecurity expert. Reply ONLY with valid JSON — no markdown, no preamble."},
-                {"role": "user",   "content": prompt}
+                {"role": "user", "content": prompt}
             ],
         )
-        raw   = response.choices[0].message.content.strip()
-        raw   = re.sub(r"^```(?:json)?\s*|```$", "", raw, flags=re.MULTILINE).strip()
+        raw = response.choices[0].message.content.strip()
+        raw = re.sub(r"^```(?:json)?\s*|```$", "", raw, flags=re.MULTILINE).strip()
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         if not match:
             return {}, False
@@ -109,6 +110,61 @@ Scoring rules:
         print(f"[Groq AI error] {e}")
         return {}, False
 
+# ── Groq AI summary call ──────────────────────────────────────────────────────
+
+def ask_ai_summary(url, domain, score, risk_level, checks):
+    """
+    Returns a plain-English summary string, or None on failure.
+    FIX: use 'is True' / 'is None' to correctly distinguish True/False/None.
+    """
+    check_lines = []
+    for name, data in checks.items():
+        # FIX: was 'if data.get("passed")' which treated False same as None
+        if data.get("passed") is True:
+            status = "PASS"
+        elif data.get("passed") is None:
+            status = "SKIP"
+        else:
+            status = "FAIL"
+        check_lines.append(
+            f"  {name}: {status} (score +{data.get('score', 0)}) — {data.get('detail', '')}"
+        )
+    checks_text = "\n".join(check_lines)
+
+    prompt = f"""A phishing-detection system analysed the following URL and produced this report.
+
+URL: {url}
+Domain: {domain}
+Total risk score: {score}/100
+Risk level: {risk_level}
+
+Check results:
+{checks_text}
+
+Write a 2-4 sentence plain-English summary for a non-technical user explaining:
+1. The overall verdict and why.
+2. The most important red flags that drove the score up (if any).
+3. What the user should do.
+
+Be direct, clear, and avoid jargon. Do NOT repeat the score number; describe severity in words."""
+
+    try:
+        response = _ai.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=200,
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": "You are a helpful cybersecurity assistant explaining results to everyday users."},
+                {"role": "user", "content": prompt}
+            ],
+        )
+        result = response.choices[0].message.content.strip()
+        print(f"[Groq summary OK] length={len(result)}")
+        return result
+    except Exception as e:
+        print(f"[Groq summary error] {e}")
+        return None
+
 # ── Detector ──────────────────────────────────────────────────────────────────
 
 class FakeWebsiteDetector:
@@ -117,8 +173,8 @@ class FakeWebsiteDetector:
         if not url.startswith(("http://", "https://")):
             url = "https://" + url
 
-        parsed   = urllib.parse.urlparse(url)
-        domain   = parsed.netloc.lower().replace("www.", "")
+        parsed = urllib.parse.urlparse(url)
+        domain = parsed.netloc.lower().replace("www.", "")
         full_url = url.lower()
 
         checks = {
@@ -133,7 +189,7 @@ class FakeWebsiteDetector:
         }
 
         phase1_score = sum(c["score"] for c in checks.values() if c["score"] is not None)
-        ai_used    = False
+        ai_used = False
         ai_warning = None
 
         if phase1_score >= SUSPICION_THRESHOLD:
@@ -142,18 +198,25 @@ class FakeWebsiteDetector:
                 ai_used = True
                 checks["suspicious_keywords"] = batch["keywords"]
                 checks["brand_impersonation"] = batch["brand"]
-                checks["risky_tld"]           = batch["tld"]
+                checks["risky_tld"] = batch["tld"]
             else:
                 ai_warning = "AI analysis failed — rule-based fallback used. Results may be less accurate."
                 checks["suspicious_keywords"] = self._v1_keywords(full_url)
                 checks["brand_impersonation"] = self._v1_brand(domain)
-                checks["risky_tld"]           = self._v1_tld(domain)
+                checks["risky_tld"] = self._v1_tld(domain)
         else:
             checks["suspicious_keywords"] = self._v1_keywords(full_url)
             checks["brand_impersonation"] = self._v1_brand(domain)
-            checks["risky_tld"]           = self._v1_tld(domain)
+            checks["risky_tld"] = self._v1_tld(domain)
 
         score, risk_level = self._calculate_risk(checks)
+
+        # FIX: wrapped in try/except so a crash here never kills the whole response
+        try:
+            ai_summary = ask_ai_summary(url, domain, score, risk_level, checks)
+        except Exception as e:
+            print(f"[summary call error] {e}")
+            ai_summary = None
 
         return {
             "url":         url,
@@ -162,14 +225,17 @@ class FakeWebsiteDetector:
             "risk_level":  risk_level,
             "ai_used":     ai_used,
             "ai_warning":  ai_warning,
+            "ai_summary":  ai_summary,
             "checks":      checks,
             "analyzed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         }
 
     def _check_url_length(self, url):
         n = len(url)
-        if n > 100: return {"passed": False, "score": 20, "detail": f"Very long URL ({n} chars) — common in phishing."}
-        if n > 75:  return {"passed": False, "score": 10, "detail": f"Moderately long URL ({n} chars)."}
+        if n > 100:
+            return {"passed": False, "score": 20, "detail": f"Very long URL ({n} chars) — common in phishing."}
+        if n > 75:
+            return {"passed": False, "score": 10, "detail": f"Moderately long URL ({n} chars)."}
         return {"passed": True, "score": 0, "detail": f"URL length is normal ({n} chars)."}
 
     def _check_https(self, url):
@@ -180,8 +246,10 @@ class FakeWebsiteDetector:
     def _check_subdomain_abuse(self, domain):
         parts = domain.split(".")
         depth = len(parts[:-2]) if len(parts) > 2 else 0
-        if depth >= 3: return {"passed": False, "score": 25, "detail": f"Excessive subdomain depth ({depth} levels)."}
-        if depth == 2: return {"passed": False, "score": 10, "detail": "Deep subdomains may mask the real host."}
+        if depth >= 3:
+            return {"passed": False, "score": 25, "detail": f"Excessive subdomain depth ({depth} levels)."}
+        if depth == 2:
+            return {"passed": False, "score": 10, "detail": "Deep subdomains may mask the real host."}
         return {"passed": True, "score": 0, "detail": "Subdomain structure looks normal."}
 
     def _check_ip_host(self, netloc):
@@ -208,7 +276,7 @@ class FakeWebsiteDetector:
 
     def _check_redirects(self, url):
         try:
-            req  = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             resp = urllib.request.urlopen(req, timeout=5)
             final = resp.geturl()
             if final != url and urllib.parse.urlparse(final).netloc != urllib.parse.urlparse(url).netloc:
@@ -223,9 +291,9 @@ class FakeWebsiteDetector:
             ctx = ssl.create_default_context()
             with socket.create_connection((host, 443), timeout=5) as sock:
                 with ctx.wrap_socket(sock, server_hostname=host) as ssock:
-                    cert   = ssock.getpeercert()
+                    cert = ssock.getpeercert()
                     issuer = dict(x[0] for x in cert.get("issuer", []))
-                    org    = issuer.get("organizationName", "unknown")
+                    org = issuer.get("organizationName", "unknown")
                     return {"passed": True, "score": 0, "detail": f"Valid SSL cert from {org}."}
         except ssl.SSLCertVerificationError:
             return {"passed": False, "score": 30, "detail": "Invalid or self-signed SSL certificate."}
@@ -234,8 +302,10 @@ class FakeWebsiteDetector:
 
     def _v1_keywords(self, full_url):
         found = [kw for kw in SUSPICIOUS_KEYWORDS if kw in full_url]
-        if len(found) >= 3: return {"passed": False, "score": 20, "detail": f"Suspicious keywords: {', '.join(found[:5])}."}
-        if found:           return {"passed": False, "score": 8,  "detail": f"Keyword(s) found: {', '.join(found)}."}
+        if len(found) >= 3:
+            return {"passed": False, "score": 20, "detail": f"Suspicious keywords: {', '.join(found[:5])}."}
+        if found:
+            return {"passed": False, "score": 8, "detail": f"Keyword(s) found: {', '.join(found)}."}
         return {"passed": True, "score": 0, "detail": "No suspicious keywords found."}
 
     def _v1_brand(self, domain):
@@ -248,8 +318,10 @@ class FakeWebsiteDetector:
 
     def _v1_tld(self, domain):
         tld = "." + domain.rsplit(".", 1)[-1]
-        if tld in RISKY_TLDS:       return {"passed": False, "score": 20, "detail": f"High-risk TLD '{tld}'."}
-        if tld not in TRUSTED_TLDS: return {"passed": False, "score": 5,  "detail": f"Uncommon TLD '{tld}'."}
+        if tld in RISKY_TLDS:
+            return {"passed": False, "score": 20, "detail": f"High-risk TLD '{tld}'."}
+        if tld not in TRUSTED_TLDS:
+            return {"passed": False, "score": 5, "detail": f"Uncommon TLD '{tld}'."}
         return {"passed": True, "score": 0, "detail": f"TLD '{tld}' is trusted."}
 
     def _calculate_risk(self, checks):
@@ -260,15 +332,17 @@ class FakeWebsiteDetector:
 
 detector = FakeWebsiteDetector()
 
+
 @app.route("/")
 def index():
     url = request.args.get("url", "")
     return render_template("index.html", prefill_url=url)
 
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
-    url  = data.get("url", "").strip()
+    url = data.get("url", "").strip()
     if not url:
         return jsonify({"error": "No URL provided"}), 400
     try:
@@ -276,6 +350,7 @@ def analyze():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
