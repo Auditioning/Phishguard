@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhishGuard — Fake Website Detector</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,7 +17,7 @@
       --text:      #e8edf5;
       --muted:     #5a6a80;
       --accent:    #00d4ff;
-      --accent-dim:#003a47;
+      --accent-dim: #003a47;
       --low:       #00e57a;
       --low-dim:   #002a1a;
       --mid:       #ffb020;
@@ -94,7 +94,6 @@
       letter-spacing: -0.5px;
       color: var(--text);
     }
-
     .logo-text span { color: var(--accent); }
 
     h1 {
@@ -104,11 +103,7 @@
       line-height: 1.2;
       margin-bottom: 16px;
     }
-
-    h1 em {
-      font-style: normal;
-      color: var(--accent);
-    }
+    h1 em { font-style: normal; color: var(--accent); }
 
     .subtitle {
       font-size: 16px;
@@ -119,6 +114,7 @@
       line-height: 1.6;
     }
 
+    /* Input Card */
     .input-card {
       background: var(--surface);
       border: 1px solid var(--border2);
@@ -129,19 +125,7 @@
       overflow: hidden;
     }
 
-    .input-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.5;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 12px;
-    }
+    .input-row { display: flex; gap: 12px; }
 
     .url-input {
       flex: 1;
@@ -156,8 +140,6 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .url-input::placeholder { color: var(--muted); }
-
     .url-input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
@@ -169,28 +151,12 @@
       border: none;
       border-radius: 12px;
       padding: 14px 28px;
-      font-family: var(--font);
-      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      white-space: nowrap;
-      letter-spacing: 0.3px;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
     .scan-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,212,255,0.3); }
-    .scan-btn:active { transform: translateY(0); }
-    .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    .examples {
-      margin-top: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .examples-label { font-size: 12px; color: var(--muted); }
 
     .example-pill {
       font-family: var(--mono);
@@ -201,71 +167,38 @@
       padding: 4px 10px;
       color: var(--muted);
       cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-    }
-
-    .example-pill:hover { color: var(--accent); border-color: var(--accent); }
-
-    #loading {
-      display: none;
-      text-align: center;
-      padding: 60px 0;
-    }
-
-    #loading.active { display: block; }
-
-    .scanner {
+      margin-top: 14px;
       display: inline-block;
-      width: 64px; height: 64px;
+      margin-right: 8px;
+    }
+
+    /* AI Summary Box */
+    .ai-summary-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
       position: relative;
-      margin-bottom: 20px;
+      border-left: 4px solid var(--accent);
+      animation: fadeUp 0.5s ease;
     }
 
-    .scanner-ring {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      border-top-color: var(--accent);
-      animation: spin 1s linear infinite;
-    }
-
-    .scanner-ring-2 {
-      position: absolute;
-      inset: 8px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      border-top-color: rgba(0,212,255,0.4);
-      animation: spin 1.5s linear infinite reverse;
-    }
-
-    .scanner-dot {
-      position: absolute;
-      inset: 0;
+    .ai-summary-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 22px;
+      gap: 6px;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .ai-summary-text { font-size: 14px; line-height: 1.6; color: var(--text); }
 
-    .loading-text { font-size: 15px; color: var(--muted); }
-    .loading-step { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-top: 8px; }
-
-    #results {
-      display: none;
-    }
-    #results.active {
-      display: block !important;
-      animation: fadeUp 0.4s ease;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
+    /* Results Styling */
     .score-hero {
       background: var(--surface);
       border: 1px solid var(--border2);
@@ -277,411 +210,43 @@
       gap: 36px;
       align-items: center;
       position: relative;
-      overflow: hidden;
     }
 
-    .score-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--risk-color, var(--accent)), transparent);
-    }
-
-    .score-circle-wrap {
-      position: relative;
-      width: 140px;
-      height: 140px;
-      flex-shrink: 0;
-    }
-
+    .score-circle-wrap { position: relative; width: 140px; height: 140px; }
     .score-svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+    .score-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+    .score-fill { fill: none; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 345; stroke-dashoffset: 345; transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
 
-    .score-track {
-      fill: none;
-      stroke: rgba(255,255,255,0.06);
-      stroke-width: 8;
-    }
+    .score-number { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-value { font-size: 36px; font-weight: 800; }
 
-    .score-fill {
-      fill: none;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 345;
-      stroke-dashoffset: 345;
-      transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.3s;
-    }
-
-    .score-number {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .score-value {
-      font-size: 36px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -2px;
-    }
-
-    .score-max { font-size: 13px; color: var(--muted); margin-top: 2px; }
-
-    .risk-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-
-    .risk-badge .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.8); }
-    }
-
-    .score-domain {
-      font-family: var(--mono);
-      font-size: 15px;
-      color: var(--text);
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-
-    .score-url {
-      font-size: 13px;
-      color: var(--muted);
-      word-break: break-all;
-      margin-bottom: 14px;
-    }
-
-    .score-meta {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .meta-tag {
-      font-size: 12px;
-      color: var(--muted);
-      background: var(--surface2);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .meta-tag.ai { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-dim); }
-
-    .ai-warning {
-      background: rgba(255,176,32,0.08);
-      border: 1px solid rgba(255,176,32,0.25);
-      border-radius: 12px;
-      padding: 14px 18px;
-      font-size: 13px;
-      color: var(--mid);
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .checks-title {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .checks-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 600px) { .checks-grid { grid-template-columns: 1fr; } }
-
-    .check-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      transition: border-color 0.2s, transform 0.2s;
-      opacity: 0;
-      transform: translateY(8px);
-      animation: cardIn 0.3s ease forwards;
-    }
-
-    .check-card:hover { border-color: var(--border2); transform: translateY(-1px) !important; }
-
-    @keyframes cardIn {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .check-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .check-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .check-ai-tag {
-      font-size: 10px;
-      color: var(--accent);
-      background: var(--accent-dim);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-
-    .check-status { font-size: 18px; }
-
-    .check-detail {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .check-score {
-      margin-top: 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-    }
-
-    .risk-low  { color: var(--low);  background: var(--low-dim);  }
-    .risk-mid  { color: var(--mid);  background: var(--mid-dim);  }
+    .risk-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    .risk-low { color: var(--low); background: var(--low-dim); }
+    .risk-mid { color: var(--mid); background: var(--mid-dim); }
     .risk-high { color: var(--high); background: var(--high-dim); }
 
-    .error-box {
-      background: var(--high-dim);
-      border: 1px solid rgba(255,61,90,0.3);
-      border-radius: 14px;
-      padding: 20px;
-      color: var(--high);
-      font-size: 14px;
-      display: none;
-      margin-bottom: 20px;
-    }
-    .error-box.active { display: block; animation: fadeUp 0.3s ease; }
+    .checks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+    .check-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; opacity: 0; transform: translateY(8px); animation: cardIn 0.3s ease forwards; }
 
-    footer {
-      text-align: center;
-      padding: 32px 0 0;
-      font-size: 12px;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-    }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-    footer span { color: var(--accent); }
+    #loading { display: none; text-align: center; padding: 40px; }
+    #loading.active { display: block; }
+    #results { display: none; }
+    #results.active { display: block; }
 
-    .bookmarklet-section {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 20px;
-      padding: 28px;
-      margin-top: 32px;
-      position: relative;
-      overflow: hidden;
-    }
+    .meta-tag { font-size: 12px; color: var(--muted); background: var(--surface2); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-right: 8px; }
+    .meta-tag.ai { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-dim); }
 
-    .bookmarklet-section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #00d4ff, transparent);
-      opacity: 0.4;
-    }
+    .error-box { background: var(--high-dim); border: 1px solid rgba(255,61,90,0.3); border-radius: 14px; padding: 20px; color: var(--high); display: none; margin-bottom: 20px; }
+    .error-box.active { display: block; }
 
-    .bookmarklet-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
+    /* Bookmarklet Section */
+    .bookmarklet-section { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 28px; margin-top: 32px; }
+    .bookmarklet-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--accent), #0088aa); color: #000; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; cursor: grab; }
 
-    .bookmarklet-icon {
-      font-size: 28px;
-      width: 52px; height: 52px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .bookmarklet-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .bookmarklet-sub {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .bookmarklet-steps {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .bm-step {
-      flex: 1;
-      min-width: 160px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .bm-step-num {
-      width: 22px; height: 22px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      border-radius: 50%;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .bm-step-text {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .bm-step-text span { color: var(--text); display: block; margin-top: 4px; }
-
-    kbd {
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--accent);
-    }
-
-    .bookmarklet-drag-area {
-      text-align: center;
-      padding: 24px;
-      background: var(--surface2);
-      border: 2px dashed var(--border2);
-      border-radius: 16px;
-      margin-bottom: 20px;
-      transition: border-color 0.2s;
-    }
-
-    .bookmarklet-drag-area:hover { border-color: var(--accent); }
-
-    .drag-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
-
-    .bookmarklet-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, var(--accent), #0088aa);
-      color: #000;
-      font-family: var(--font);
-      font-size: 15px;
-      font-weight: 700;
-      padding: 12px 24px;
-      border-radius: 10px;
-      text-decoration: none;
-      cursor: grab;
-      transition: transform 0.15s, box-shadow 0.15s;
-      user-select: none;
-      box-shadow: 0 4px 20px rgba(0,212,255,0.25);
-    }
-
-    .bookmarklet-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(0,212,255,0.35);
-    }
-
-    .bookmarklet-btn:active { cursor: grabbing; transform: scale(0.97); }
-
-    .drag-hint {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 12px;
-    }
-
-    .bookmarklet-demo {
-      border-top: 1px solid var(--border);
-      padding-top: 18px;
-    }
-
-    .demo-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    .demo-steps {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .demo-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--muted);
-      background: var(--surface2);
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .demo-icon { font-size: 16px; }
-    .demo-arrow { color: var(--muted); font-size: 16px; }
-
+    footer { text-align: center; padding: 32px 0; font-size: 12px; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -690,46 +255,29 @@
 <div class="orb orb-2"></div>
 
 <div class="container">
-
   <header>
     <div class="logo">
       <div class="logo-icon">🛡</div>
       <div class="logo-text">Phish<span>Guard</span></div>
     </div>
     <h1><em>Web</em> Detector</h1>
-    <p class="subtitle">Hybrid AI + rule-based analysis. Paste any URL and get an instant phishing risk report.</p>
+    <p class="subtitle">Hybrid AI + rule-based analysis. Powered by Llama 3.3 via Groq.</p>
   </header>
 
   <div class="input-card">
     <div class="input-row">
-      <input
-        class="url-input"
-        id="urlInput"
-        type="text"
-        placeholder="https://suspicious-site.tk/verify/account"
-        autocomplete="off"
-        spellcheck="false"
-        value="{{ prefill_url }}"
-      />
+      <input class="url-input" id="urlInput" type="text" placeholder="Paste URL here..." value="{{ prefill_url }}" />
       <button class="scan-btn" id="scanBtn" onclick="runScan()">Scan →</button>
     </div>
     <div class="examples">
-      <span class="examples-label">Try:</span>
       <span class="example-pill" onclick="setUrl('https://google.com')">google.com</span>
-      <span class="example-pill" onclick="setUrl('http://paypal-secure-login.tk/verify/account')">paypal-secure-login.tk</span>
-      <span class="example-pill" onclick="setUrl('https://amazon-support-billing.xyz/update')">amazon-support-billing.xyz</span>
-      <span class="example-pill" onclick="setUrl('https://paly-pal.com/login')">paly-pal.com</span>
+      <span class="example-pill" onclick="setUrl('http://paypal-secure-login.tk')">paypal-secure.tk</span>
     </div>
   </div>
 
   <div id="loading">
-    <div class="scanner">
-      <div class="scanner-ring"></div>
-      <div class="scanner-ring-2"></div>
-      <div class="scanner-dot">🔍</div>
-    </div>
-    <div class="loading-text">Analyzing URL…</div>
-    <div class="loading-step" id="loadingStep">Running rule-based checks…</div>
+    <div style="font-size: 30px; margin-bottom: 10px;">🔍</div>
+    <div style="color: var(--accent); font-family: var(--mono); font-size: 13px;" id="loadingStep">Initializing AI analysis...</div>
   </div>
 
   <div class="error-box" id="errorBox"></div>
@@ -737,120 +285,41 @@
   <div id="results"></div>
 
   <div class="bookmarklet-section">
-    <div class="bookmarklet-header">
-      <div class="bookmarklet-icon">🔖</div>
-      <div>
-        <div class="bookmarklet-title">PhishGuard Button</div>
-        <div class="bookmarklet-sub">Scan any website in one click — no extension needed</div>
-      </div>
-    </div>
-
-    <div class="bookmarklet-steps">
-      <div class="bm-step">
-        <div class="bm-step-num">1</div>
-        <div class="bm-step-text">Show your bookmarks bar<span>Chrome: press <kbd>Ctrl+Shift+B</kbd></span></div>
-      </div>
-      <div class="bm-step">
-        <div class="bm-step-num">2</div>
-        <div class="bm-step-text">Drag the button below into your bookmarks bar</div>
-      </div>
-      <div class="bm-step">
-        <div class="bm-step-num">3</div>
-        <div class="bm-step-text">While browsing any site, click it to scan instantly</div>
-      </div>
-    </div>
-
-    <div class="bookmarklet-drag-area">
-      <div class="drag-label">👇 Drag this button to your bookmarks bar</div>
-      <a id="bookmarkletBtn" class="bookmarklet-btn" title="Drag me to your bookmarks bar!">
-        🛡 PhishGuard
-      </a>
-      <div class="drag-hint">or right-click → Bookmark this link</div>
-    </div>
-
-    <div class="bookmarklet-demo">
-      <div class="demo-label">How it works</div>
-      <div class="demo-steps">
-        <div class="demo-item"><span class="demo-icon">🌐</span><span>You visit any website</span></div>
-        <div class="demo-arrow">→</div>
-        <div class="demo-item"><span class="demo-icon">🔖</span><span>Click PhishGuard bookmark</span></div>
-        <div class="demo-arrow">→</div>
-        <div class="demo-item"><span class="demo-icon">🛡</span><span>Full scan result appears</span></div>
-      </div>
-    </div>
+    <h3 style="margin-bottom: 12px;">🛡 Quick Scan Bookmarklet</h3>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Drag this button to your bookmarks bar to scan any site instantly.</p>
+    <a id="bookmarkletBtn" class="bookmarklet-btn">🛡 PhishGuard</a>
   </div>
 
-  <footer>
-    Built with <span>PhishGuard v4.0</span> · Hybrid AI + Rule-Based Detection
-  </footer>
-
+  <footer>Built with PhishGuard v4.0 · Hybrid Intelligence</footer>
 </div>
 
 <script>
   const CHECK_LABELS = {
-    url_length:          { name: "URL Length",           icon: "📏" },
-    https:               { name: "HTTPS",                icon: "🔒" },
-    subdomain_abuse:     { name: "Subdomain Depth",      icon: "🌐" },
-    ip_as_host:          { name: "IP as Host",           icon: "🖥" },
-    special_chars:       { name: "Special Characters",   icon: "⚡" },
-    typosquatting:       { name: "Typosquatting",        icon: "🔤" },
-    redirect_count:      { name: "Redirects",            icon: "↪️" },
-    ssl_cert:            { name: "SSL Certificate",      icon: "🛡" },
-    suspicious_keywords: { name: "Suspicious Keywords",  icon: "🚨", ai: true },
-    brand_impersonation: { name: "Brand Impersonation",  icon: "🏷",  ai: true },
-    risky_tld:           { name: "TLD Safety",           icon: "🌍", ai: true },
+    url_length: { name: "URL Length", icon: "📏" },
+    https: { name: "HTTPS", icon: "🔒" },
+    subdomain_abuse: { name: "Subdomain Depth", icon: "🌐" },
+    ip_as_host: { name: "IP as Host", icon: "🖥" },
+    special_chars: { name: "Special Characters", icon: "⚡" },
+    typosquatting: { name: "Typosquatting", icon: "🔤" },
+    redirect_count: { name: "Redirects", icon: "↪️" },
+    ssl_cert: { name: "SSL Certificate", icon: "🛡" },
+    suspicious_keywords: { name: "Suspicious Keywords", icon: "🚨", ai: true },
+    brand_impersonation: { name: "Brand Impersonation", icon: "🏷", ai: true },
+    risky_tld: { name: "TLD Safety", icon: "🌍", ai: true },
   };
-
-  let loadingInterval;
 
   function setUrl(url) {
     document.getElementById("urlInput").value = url;
-    document.getElementById("urlInput").focus();
-  }
-
-  document.getElementById("urlInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") runScan();
-  });
-
-  window.addEventListener("load", () => {
-    const val = document.getElementById("urlInput").value.trim();
-    if (val) runScan();
-  });
-
-  function showLoading() {
-    document.getElementById("loading").classList.add("active");
-    document.getElementById("scanBtn").disabled = true;
-    document.getElementById("results").classList.remove("active");
-    document.getElementById("results").innerHTML = "";
-    document.getElementById("errorBox").classList.remove("active");
-
-    const steps = [
-      "Running rule-based checks…",
-      "Checking SSL certificate…",
-      "Following redirects…",
-      "Consulting AI analysis…",
-      "Calculating risk score…",
-    ];
-    let i = 0;
-    const el = document.getElementById("loadingStep");
-    el.textContent = steps[0];
-    loadingInterval = setInterval(() => {
-      i = (i + 1) % steps.length;
-      el.textContent = steps[i];
-    }, 1400);
-  }
-
-  function hideLoading() {
-    document.getElementById("loading").classList.remove("active");
-    document.getElementById("scanBtn").disabled = false;
-    clearInterval(loadingInterval);
+    runScan();
   }
 
   async function runScan() {
     const url = document.getElementById("urlInput").value.trim();
     if (!url) return;
 
-    showLoading();
+    document.getElementById("loading").classList.add("active");
+    document.getElementById("results").classList.remove("active");
+    document.getElementById("errorBox").classList.remove("active");
 
     try {
       const res = await fetch("/analyze", {
@@ -859,18 +328,18 @@
         body: JSON.stringify({ url }),
       });
       const data = await res.json();
-
-      hideLoading();
+      
+      document.getElementById("loading").classList.remove("active");
 
       if (data.error) {
-        document.getElementById("errorBox").textContent = "⚠ Error: " + data.error;
+        document.getElementById("errorBox").textContent = data.error;
         document.getElementById("errorBox").classList.add("active");
       } else {
         renderResults(data);
       }
     } catch (err) {
-      hideLoading();
-      document.getElementById("errorBox").textContent = "⚠ Could not connect to server. Is Flask running?";
+      document.getElementById("loading").classList.remove("active");
+      document.getElementById("errorBox").textContent = "Connection error. Is the backend running?";
       document.getElementById("errorBox").classList.add("active");
     }
   }
@@ -878,10 +347,14 @@
   function renderResults(data) {
     const riskClass = { LOW: "risk-low", MEDIUM: "risk-mid", HIGH: "risk-high" }[data.risk_level];
     const riskColor = { LOW: "var(--low)", MEDIUM: "var(--mid)", HIGH: "var(--high)" }[data.risk_level];
-    const riskEmoji = { LOW: "✅", MEDIUM: "⚠️", HIGH: "🚨" }[data.risk_level];
-
-    const circumference = 345;
-    const offset = circumference - (data.score / 100) * circumference;
+    
+    // AI Summary Box logic
+    const summaryHtml = data.ai_summary 
+      ? `<div class="ai-summary-box">
+           <div class="ai-summary-title">✦ AI Insight Summary</div>
+           <div class="ai-summary-text">${data.ai_summary}</div>
+         </div>`
+      : "";
 
     let checksHtml = "";
     let delay = 0;
@@ -889,89 +362,70 @@
       const meta = CHECK_LABELS[key];
       if (!meta) continue;
       const statusEmoji = check.passed === true ? "✅" : check.passed === false ? "❌" : "⚠️";
-      const scoreColor  = check.score === 0 ? "var(--low)" : check.score >= 20 ? "var(--high)" : "var(--mid)";
-      const aiTag = (meta.ai && data.ai_used) ? `<span class="check-ai-tag">✦ AI</span>` : "";
+      const scoreVal = check.score || 0;
+      const scoreColor = scoreVal === 0 ? "var(--low)" : scoreVal >= 20 ? "var(--high)" : "var(--mid)";
+      
       checksHtml += `
         <div class="check-card" style="animation-delay:${delay}ms">
-          <div class="check-header">
-            <div class="check-name">${meta.icon} ${meta.name} ${aiTag}</div>
-            <div class="check-status">${statusEmoji}</div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <div style="font-size:13px; font-weight:600;">${meta.icon} ${meta.name}</div>
+            <div>${statusEmoji}</div>
           </div>
-          <div class="check-detail">${check.detail}</div>
-          ${check.score > 0 ? `<div class="check-score" style="color:${scoreColor}">+${check.score} pts</div>` : ""}
+          <div style="font-size:12px; color:var(--muted); line-height:1.4;">${check.detail}</div>
+          ${scoreVal > 0 ? `<div style="color:${scoreColor}; font-size:11px; margin-top:8px; font-family:var(--mono)">+${scoreVal} pts</div>` : ""}
         </div>`;
       delay += 50;
     }
 
-    const warningHtml = data.ai_warning
-      ? `<div class="ai-warning"><span>⚠</span><span>${data.ai_warning}</span></div>`
-      : "";
-
-    const modeTag = data.ai_used
-      ? `<div class="meta-tag ai">✦ AI + Rules</div>`
-      : `<div class="meta-tag">⚡ Rules only</div>`;
-
     const resultsEl = document.getElementById("results");
     resultsEl.innerHTML = `
-      <div class="score-hero" style="--risk-color:${riskColor}">
+      <div class="score-hero" style="border-top: 2px solid ${riskColor}">
         <div class="score-circle-wrap">
           <svg class="score-svg" viewBox="0 0 120 120">
             <circle class="score-track" cx="60" cy="60" r="55"/>
-            <circle class="score-fill" id="scoreFill" cx="60" cy="60" r="55"
-              stroke="${riskColor}" style="stroke-dashoffset:${circumference}"/>
+            <circle class="score-fill" id="scoreFill" cx="60" cy="60" r="55" stroke="${riskColor}"/>
           </svg>
           <div class="score-number">
             <div class="score-value" style="color:${riskColor}" id="scoreNum">0</div>
-            <div class="score-max">/ 100</div>
+            <div style="font-size:10px; color:var(--muted)">SCORE</div>
           </div>
         </div>
-        <div class="score-info">
-          <div class="risk-badge ${riskClass}">
-            <div class="dot" style="background:${riskColor}"></div>
-            ${riskEmoji} ${data.risk_level} RISK
-          </div>
-          <div class="score-domain">${data.domain}</div>
-          <div class="score-url">${data.url}</div>
-          <div class="score-meta">
-            ${modeTag}
-            <div class="meta-tag">🕐 ${new Date(data.analyzed_at).toLocaleTimeString()}</div>
-          </div>
+        <div>
+          <div class="risk-badge ${riskClass}">${data.risk_level} RISK</div>
+          <div style="font-family:var(--mono); font-size:14px; margin-bottom:4px;">${data.domain}</div>
+          <div class="meta-tag ${data.ai_used ? 'ai' : ''}">${data.ai_used ? '✦ AI Enhanced' : '⚡ Rules Only'}</div>
+          <div class="meta-tag">🕐 ${new Date().toLocaleTimeString()}</div>
         </div>
       </div>
-      ${warningHtml}
-      <div class="checks-title">Detailed Checks</div>
+      ${summaryHtml}
+      <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:12px;">Security Analysis</div>
       <div class="checks-grid">${checksHtml}</div>
     `;
 
     resultsEl.classList.add("active");
 
-    requestAnimationFrame(() => {
-      const fill = document.getElementById("scoreFill");
-      if (fill) fill.style.strokeDashoffset = offset;
-
-      let current = 0;
+    // Animation for score circle
+    setTimeout(() => {
       const target = data.score;
-      const el = document.getElementById("scoreNum");
-      const step = Math.max(target / 60, 1);
-      const timer = setInterval(() => {
-        current = Math.min(current + step, target);
-        if (el) el.textContent = Math.round(current);
-        if (current >= target) clearInterval(timer);
-      }, 16);
-    });
+      const fill = document.getElementById("scoreFill");
+      const num = document.getElementById("scoreNum");
+      fill.style.strokeDashoffset = 345 - (target / 100) * 345;
+      
+      let curr = 0;
+      const interval = setInterval(() => {
+        if (curr >= target) { curr = target; clearInterval(interval); }
+        num.textContent = Math.round(curr);
+        curr += target / 30;
+      }, 30);
+    }, 100);
   }
 
+  // Set up bookmarklet
   (function() {
-    const origin = window.location.origin;
-    const code = `javascript:(function(){
-      var url=encodeURIComponent(window.location.href);
-      var w=window.open('${origin}/?url='+url,'_blank','width=900,height=700');
-      w.focus();
-    })();`;
-    const btn = document.getElementById('bookmarkletBtn');
-    if (btn) btn.href = code;
+    const code = `javascript:(function(){window.open('${window.location.origin}/?url='+encodeURIComponent(window.location.href),'_blank','width=900,height=700');})();`;
+    document.getElementById('bookmarkletBtn').href = code;
   })();
-
 </script>
+
 </body>
 </html>
